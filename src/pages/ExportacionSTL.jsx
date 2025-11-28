@@ -5,7 +5,8 @@ import { Download, Loader2, Trash2, FileDown, CheckCircle2, XCircle } from 'luci
 import Swal from 'sweetalert2';
 import { userHeaders } from '../utils/authHeaders';
 
-const API = 'http://localhost:8000';
+// ✅ URL dinámica para producción y desarrollo
+const API = import.meta.env.VITE_API_URL;
 
 export default function ExportacionSTL() {
   const navigate = useNavigate();
@@ -17,25 +18,21 @@ export default function ExportacionSTL() {
 
   const cargarSeries = async () => {
     try {
-      // Obtener todas las series del usuario
       const res = await fetch(`${API}/historial/archivos`, {
         headers: { ...userHeaders() },
       });
       if (!res.ok) throw new Error('Error al cargar series');
       const data = await res.json();
 
-      // Para cada serie, verificar si tiene segmentaciones 3D y modelos STL
       const seriesConInfo = await Promise.all(
         data.map(async (serie) => {
           try {
-            // Obtener segmentaciones 3D
             const res3D = await fetch(
               `${API}/historial/series/${serie.session_id}/segmentaciones-3d`,
               { headers: { ...userHeaders() } }
             );
             const seg3D = res3D.ok ? await res3D.json() : [];
 
-            // Obtener modelos STL
             const resModelos = await fetch(
               `${API}/series/${serie.session_id}/modelos3d`,
               { headers: { ...userHeaders() } }
@@ -125,7 +122,6 @@ export default function ExportacionSTL() {
 
       const nuevo = { ...data, id: data.id ?? data.modelo_id };
 
-      // Actualizar estado local
       setSeries((prev) =>
         prev.map((s) =>
           s.session_id === serie.session_id
@@ -183,10 +179,10 @@ export default function ExportacionSTL() {
         prev.map((s) =>
           s.session_id === serie.session_id
             ? {
-              ...s,
-              modelos: s.modelos.filter((m) => m.id !== modeloId),
-              tieneModelos: s.modelos.filter((m) => m.id !== modeloId).length > 0,
-            }
+                ...s,
+                modelos: s.modelos.filter((m) => m.id !== modeloId),
+                tieneModelos: s.modelos.filter((m) => m.id !== modeloId).length > 0,
+              }
             : s
         )
       );
@@ -289,7 +285,7 @@ export default function ExportacionSTL() {
                 </div>
 
                 <div className="p-4 sm:p-6">
-                  {/* Segmentaciones 3D disponibles */}
+                  {/* Segmentaciones 3D */}
                   {serie.tieneSegmentaciones3D ? (
                     <>
                       <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
@@ -327,10 +323,11 @@ export default function ExportacionSTL() {
                               <button
                                 onClick={() => exportarStl(serie, seg.id)}
                                 disabled={exportandoId === seg.id}
-                                className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium transition-all ${exportandoId === seg.id
+                                className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium transition-all ${
+                                  exportandoId === seg.id
                                     ? 'bg-gray-400 cursor-not-allowed'
                                     : 'bg-gradient-to-r from-[#007AFF] via-[#C633FF] to-[#FF4D00] hover:opacity-90 shadow-md'
-                                  }`}
+                                }`}
                               >
                                 {exportandoId === seg.id ? (
                                   <>
@@ -377,34 +374,32 @@ export default function ExportacionSTL() {
                       <button
                         onClick={async () => {
                           try {
-                            // Cargar mapping.json
                             const mappingRes = await fetch(
-                              `http://localhost:8000/static/series/${serie.session_id}/mapping.json`
+                              `${API}/static/series/${serie.session_id}/mapping.json`
                             );
                             if (!mappingRes.ok) {
                               Swal.fire({
                                 icon: 'error',
                                 title: 'Error',
-                                text: 'No se pudo cargar el mapping de la serie'
+                                text: 'No se pudo cargar el mapping de la serie',
                               });
                               return;
                             }
 
                             const mapping = await mappingRes.json();
                             const imagePaths = Object.keys(mapping).map(
-                              (nombre) => `/static/series/${serie.session_id}/${nombre}`
+                              (nombre) => `${API}/static/series/${serie.session_id}/${nombre}`
                             );
 
-                            // Navegar al visor con las imágenes
                             navigate(`/visor/${serie.session_id}`, {
-                              state: { images: imagePaths, source: 'exportacion-stl' }
+                              state: { images: imagePaths, source: 'exportacion-stl' },
                             });
                           } catch (error) {
                             console.error('Error cargando mapping:', error);
                             Swal.fire({
                               icon: 'error',
                               title: 'Error',
-                              text: 'No se pudo cargar la serie'
+                              text: 'No se pudo cargar la serie',
                             });
                           }
                         }}
@@ -415,7 +410,7 @@ export default function ExportacionSTL() {
                     </div>
                   )}
 
-                  {/* Modelos STL generados */}
+                  {/* Modelos STL */}
                   {serie.tieneModelos && (
                     <>
                       <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">

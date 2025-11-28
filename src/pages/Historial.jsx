@@ -5,7 +5,8 @@ import Swal from "sweetalert2";
 import { userHeaders } from "../utils/authHeaders";
 import { UserPlus } from 'lucide-react';
 
-const API = 'http://localhost:8000';
+// ✅ URL dinámica
+const API = import.meta.env.VITE_API_URL;
 
 export default function Historial() {
   const [archivos, setArchivos] = useState([]);
@@ -60,7 +61,7 @@ export default function Historial() {
 
       const mapping = await res.json();
       const imagePaths = Object.keys(mapping).map(
-        (nombre) => `/static/series/${archivo.session_id}/${nombre}`
+        (nombre) => `${API}/static/series/${archivo.session_id}/${nombre}`
       );
 
       navigate(`/visor/${archivo.session_id}`, {
@@ -82,9 +83,7 @@ export default function Historial() {
         cancelButtonText: "Cancelar",
         confirmButtonColor: "#4f46e5",
       });
-      if (go.isConfirmed) {
-        navigate(`/segmentaciones/${session_id}`);
-      }
+      if (go.isConfirmed) navigate(`/segmentaciones/${session_id}`);
       return;
     }
 
@@ -141,7 +140,7 @@ export default function Historial() {
     }
   };
 
-  // ============ FUNCIONES DE VINCULACIÓN ============
+  // ---------- Vinculación ----------
 
   const cargarPacientes = async () => {
     setCargandoPacientes(true);
@@ -220,7 +219,8 @@ export default function Historial() {
   return (
     <section className="min-h-screen bg-gray-50 text-gray-900 p-4 sm:p-6 lg:p-10">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+
+        {/* HEADER */}
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
             Historial de series DICOM
@@ -230,7 +230,7 @@ export default function Historial() {
           </p>
         </div>
 
-        {/* Buscador */}
+        {/* BUSCADOR */}
         <div className="mb-6">
           <input
             type="text"
@@ -241,7 +241,7 @@ export default function Historial() {
           />
         </div>
 
-        {/* Contenido */}
+        {/* CONTENIDO */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
@@ -263,25 +263,19 @@ export default function Historial() {
           </div>
         ) : (
           <div className="bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden">
-            {/* Vista de tabla en desktop */}
+
+            {/* TABLA DESKTOP */}
             <div className="hidden lg:block overflow-x-auto">
               <table className="min-w-full">
                 <thead className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold">
-                      Nombre
-                    </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold">
-                      Segmentaciones
-                    </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold">
-                      Fecha
-                    </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold">
-                      Acciones
-                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold">Nombre</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold">Segmentaciones</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold">Fecha</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold">Acciones</th>
                   </tr>
                 </thead>
+
                 <tbody className="divide-y divide-gray-200">
                   {archivosFiltrados.map((archivo) => (
                     <tr
@@ -295,13 +289,11 @@ export default function Historial() {
                       <td className="px-6 py-4">
                         {archivo.has_segmentations ? (
                           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-50 border border-green-400/70 text-green-700 text-sm font-medium">
-                            <span className="text-green-600">✓</span>
-                            {archivo.seg_count}
+                            ✓ {archivo.seg_count}
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 border border-gray-300 text-gray-600 text-sm font-medium">
-                            <span>✗</span>
-                            0
+                            ✗ 0
                           </span>
                         )}
                       </td>
@@ -312,6 +304,7 @@ export default function Historial() {
 
                       <td className="px-6 py-4">
                         <div className="flex gap-2">
+
                           <button
                             className="bg-gradient-to-r from-[#007AFF] via-[#C633FF] to-[#FF4D00] text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
                             onClick={() => verSerie(archivo)}
@@ -322,17 +315,15 @@ export default function Historial() {
                           </button>
 
                           <button
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            onClick={() =>
-                              navigate(`/segmentaciones/${archivo.session_id}`)
-                            }
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                            onClick={() => navigate(`/segmentaciones/${archivo.session_id}`)}
                             disabled={!archivo.session_id}
                             title="Ver segmentaciones"
                           >
                             Segs
                           </button>
 
-                          {/* ✅ BOTÓN VINCULAR PACIENTE */}
+                          {/* Vincular */}
                           <button
                             className="bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-lg transition-colors disabled:opacity-50"
                             onClick={() => abrirModalVincular(archivo)}
@@ -345,15 +336,13 @@ export default function Historial() {
                           <button
                             className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
                             onClick={() =>
-                              eliminarSerie(
-                                archivo.session_id,
-                                archivo.has_segmentations
-                              )
+                              eliminarSerie(archivo.session_id, archivo.has_segmentations)
                             }
                             title="Eliminar serie"
                           >
                             🗑️
                           </button>
+
                         </div>
                       </td>
                     </tr>
@@ -362,59 +351,50 @@ export default function Historial() {
               </table>
             </div>
 
-            {/* Vista de tarjetas en móvil/tablet */}
+            {/* TARJETAS MOBILE */}
             <div className="lg:hidden divide-y divide-gray-200">
               {archivosFiltrados.map((archivo) => (
-                <div
-                  key={archivo.archivodicomid}
-                  className="p-4 sm:p-6 hover:bg-gray-50 transition-colors"
-                >
+                <div key={archivo.archivodicomid} className="p-4 sm:p-6 hover:bg-gray-50 transition-colors">
+
                   <div className="mb-3">
                     <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base break-all">
                       {archivo.nombrearchivo}
                     </h3>
+
                     <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-600">
-                      <span className="flex items-center gap-1">
-                        📅 {archivo.fechacarga}
-                      </span>
-                      <span>
-                        {archivo.has_segmentations ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-50 border border-green-400/70 text-green-700 font-medium">
-                            ✓ {archivo.seg_count} seg(s)
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 border border-gray-300 text-gray-600 font-medium">
-                            ✗ Sin segmentaciones
-                          </span>
-                        )}
-                      </span>
+                      <span className="flex items-center gap-1">📅 {archivo.fechacarga}</span>
+
+                      {archivo.has_segmentations ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-50 border border-green-400/70 text-green-700 font-medium">
+                          ✓ {archivo.seg_count}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 border border-gray-300 text-gray-600 font-medium">
+                          ✗ Sin segmentaciones
+                        </span>
+                      )}
                     </div>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
+
                     <button
                       className="flex-1 min-w-[70px] bg-gradient-to-r from-[#007AFF] via-[#C633FF] to-[#FF4D00] text-white px-3 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-md"
                       onClick={() => verSerie(archivo)}
-                      disabled={!archivo.session_id}
                     >
                       Ver
                     </button>
 
                     <button
-                      className="flex-1 min-w-[70px] bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
-                      onClick={() =>
-                        navigate(`/segmentaciones/${archivo.session_id}`)
-                      }
-                      disabled={!archivo.session_id}
+                      className="flex-1 min-w-[70px] bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                      onClick={() => navigate(`/segmentaciones/${archivo.session_id}`)}
                     >
                       Segs
                     </button>
 
-                    {/* ✅ BOTÓN VINCULAR MOBILE */}
                     <button
-                      className="flex-1 min-w-[70px] bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                      className="flex-1 min-w-[70px] bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
                       onClick={() => abrirModalVincular(archivo)}
-                      disabled={!archivo.session_id}
                     >
                       <UserPlus size={16} className="inline mr-1" />
                       Paciente
@@ -423,22 +403,21 @@ export default function Historial() {
                     <button
                       className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
                       onClick={() =>
-                        eliminarSerie(
-                          archivo.session_id,
-                          archivo.has_segmentations
-                        )
+                        eliminarSerie(archivo.session_id, archivo.has_segmentations)
                       }
                     >
                       🗑️
                     </button>
+
                   </div>
                 </div>
               ))}
             </div>
+
           </div>
         )}
 
-        {/* Footer informativo */}
+        {/* Footer */}
         {!loading && archivosFiltrados.length > 0 && (
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">
@@ -447,10 +426,11 @@ export default function Historial() {
           </div>
         )}
 
-        {/* ============ MODAL VINCULAR PACIENTE ============ */}
+        {/* ---------- MODAL VINCULAR ---------- */}
         {modalVincular && serieVincular && (
           <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+
               <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-6 rounded-t-2xl">
                 <h2 className="text-2xl font-bold">Vincular Estudio a Paciente</h2>
                 <p className="text-sm opacity-90 mt-1">
@@ -468,6 +448,7 @@ export default function Historial() {
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Selecciona un paciente:
                     </label>
+
                     <select
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none text-gray-900"
                       value={pacienteSeleccionado}
@@ -483,9 +464,8 @@ export default function Historial() {
 
                     {pacientes.length === 0 && (
                       <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
-                        <p className="text-sm text-yellow-800">
-                          No hay pacientes registrados.
-                        </p>
+                        <p className="text-sm text-yellow-800">No hay pacientes registrados.</p>
+
                         <button
                           onClick={() => {
                             setModalVincular(false);
@@ -510,6 +490,7 @@ export default function Historial() {
                   >
                     Cancelar
                   </button>
+
                   <button
                     onClick={vincularEstudio}
                     disabled={!pacienteSeleccionado || cargandoPacientes}
@@ -518,10 +499,12 @@ export default function Historial() {
                     Vincular
                   </button>
                 </div>
+
               </div>
             </div>
           </div>
         )}
+
       </div>
     </section>
   );

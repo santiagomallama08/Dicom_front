@@ -8,8 +8,8 @@ import loginAnimation from "../../Assets/lotties/login.json";
 import { motion } from 'framer-motion';
 import Tilt from 'react-parallax-tilt';
 
-
-const API_URL = 'http://localhost:8000/auth';
+// ✅ URL dinámica desde el .env
+const API_URL = import.meta.env.VITE_API_URL + '/auth';
 
 export default function LoginForm() {
     const [email, setEmail] = useState('');
@@ -22,7 +22,9 @@ export default function LoginForm() {
         setError('');
 
         try {
+            // 👉 POST al backend en Railway
             const { data } = await axios.post(`${API_URL}/login`, { email, password });
+
             const { user_id, nombre_completo, email: respEmail } = data;
 
             localStorage.setItem(
@@ -33,7 +35,8 @@ export default function LoginForm() {
                     nombre_completo,
                 })
             );
-            localStorage.setItem('session_token', 'true'); // Marca sesión iniciada
+
+            localStorage.setItem('session_token', 'true');
 
             nav('/welcome');
         } catch (err) {
@@ -53,7 +56,7 @@ export default function LoginForm() {
                 tiltMaxAngleX={10}
                 tiltMaxAngleY={10}
                 className="w-full"
-                style={{ width: '100%' }} // 👈 fuerza anchura
+                style={{ width: '100%' }}
             >
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 30 }}

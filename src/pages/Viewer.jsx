@@ -6,7 +6,8 @@ import SegmentResult from '../components/dicom/SegmentResult';
 import { userHeaders } from '../utils/authHeaders';
 import Swal from 'sweetalert2';
 
-const API_BASE_URL = 'http://localhost:8000';
+// 🔥 SOLO CAMBIADO ESTO
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const INITIAL_VIEWER_STATE = {
   zoom: 1.0,
@@ -27,7 +28,7 @@ export default function Viewer() {
   const [loading3D, setLoading3D] = useState(false);
   const [progressSegment, setProgressSegment] = useState(0);
   const [progress3D, setProgress3D] = useState(0);
-  
+
   const { session_id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -42,11 +43,11 @@ export default function Viewer() {
   const [preset, setPreset] = useState("auto");
   const [thrMin, setThrMin] = useState("");
   const [thrMax, setThrMax] = useState("");
-  
+
   const dragStart = useRef({ x: 0, y: 0 });
 
-  const imageUrl = useMemo(() => 
-    images.length ? `${API_BASE_URL}${images[current]}` : null,
+  const imageUrl = useMemo(
+    () => (images.length ? `${API_BASE_URL}${images[current]}` : null),
     [images, current]
   );
 
@@ -73,38 +74,41 @@ export default function Viewer() {
     });
   }, []);
 
-  const simulateProgress2D = useCallback(() => 
-    simulateProgress(setProgressSegment, 20, 150),
+  const simulateProgress2D = useCallback(
+    () => simulateProgress(setProgressSegment, 20, 150),
     [simulateProgress]
   );
 
-  const simulateProgress3D = useCallback(() => 
-    simulateProgress(setProgress3D, 12, 200),
+  const simulateProgress3D = useCallback(
+    () => simulateProgress(setProgress3D, 12, 200),
     [simulateProgress]
   );
 
-  const eliminarImagen = useCallback(async (index) => {
-    const result = await Swal.fire({
-      title: "Eliminar imagen",
-      text: "¿Estás seguro de eliminar esta imagen de la serie?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Eliminar",
-      cancelButtonText: "Cancelar",
-      confirmButtonColor: "#d33",
-      ...SWAL_DARK_CONFIG,
-    });
+  const eliminarImagen = useCallback(
+    async (index) => {
+      const result = await Swal.fire({
+        title: "Eliminar imagen",
+        text: "¿Estás seguro de eliminar esta imagen de la serie?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Eliminar",
+        cancelButtonText: "Cancelar",
+        confirmButtonColor: "#d33",
+        ...SWAL_DARK_CONFIG,
+      });
 
-    if (!result.isConfirmed) return;
+      if (!result.isConfirmed) return;
 
-    setImages((prev) => {
-      const updated = [...prev];
-      updated.splice(index, 1);
-      return updated;
-    });
+      setImages((prev) => {
+        const updated = [...prev];
+        updated.splice(index, 1);
+        return updated;
+      });
 
-    setCurrent((prev) => Math.max(0, Math.min(prev, images.length - 2)));
-  }, [images.length]);
+      setCurrent((prev) => Math.max(0, Math.min(prev, images.length - 2)));
+    },
+    [images.length]
+  );
 
   const segmentarImagen = useCallback(async () => {
     if (!session_id || !images[current]) return;
@@ -123,8 +127,8 @@ export default function Viewer() {
           method: "POST",
           headers: { ...userHeaders() },
           body: form,
-        }).then(res => res.json()),
-        simulateProgress2D()
+        }).then((res) => res.json()),
+        simulateProgress2D(),
       ]);
 
       setProgressSegment(100);
@@ -161,7 +165,7 @@ export default function Viewer() {
           headers: userHeaders(),
           body: form,
         }),
-        simulateProgress3D()
+        simulateProgress3D(),
       ]);
 
       const data = await res.json();
@@ -174,7 +178,7 @@ export default function Viewer() {
         title: data?.warning ? "Sin voxeles" : "Segmentación 3D lista",
         text: data?.message || "Segmentación completada",
         ...SWAL_DARK_CONFIG,
-        confirmButtonColor: '#3b82f6',
+        confirmButtonColor: "#3b82f6",
       });
 
       navigate(`/segmentaciones/${session_id}`);
@@ -185,7 +189,7 @@ export default function Viewer() {
         title: "Error",
         text: e.message,
         ...SWAL_DARK_CONFIG,
-        confirmButtonColor: '#ef4444',
+        confirmButtonColor: "#ef4444",
       });
     } finally {
       setLoading3D(false);
@@ -197,59 +201,71 @@ export default function Viewer() {
     dragStart.current = { x: e.clientX, y: e.clientY };
   }, []);
 
-  const handleMouseMove = useCallback((e) => {
-    if (!isDragging) return;
+  const handleMouseMove = useCallback(
+    (e) => {
+      if (!isDragging) return;
 
-    const deltaX = e.clientX - dragStart.current.x;
-    const deltaY = e.clientY - dragStart.current.y;
+      const deltaX = e.clientX - dragStart.current.x;
+      const deltaY = e.clientY - dragStart.current.y;
 
-    if (Math.abs(deltaY) > Math.abs(deltaX)) {
-      setWindowWidth((prev) => Math.max(100, prev + deltaY * 2));
-    } else {
-      setWindowLevel((prev) => prev + deltaX * 2);
-    }
+      if (Math.abs(deltaY) > Math.abs(deltaX)) {
+        setWindowWidth((prev) => Math.max(100, prev + deltaY * 2));
+      } else {
+        setWindowLevel((prev) => prev + deltaX * 2);
+      }
 
-    dragStart.current = { x: e.clientX, y: e.clientY };
-  }, [isDragging]);
+      dragStart.current = { x: e.clientX, y: e.clientY };
+    },
+    [isDragging]
+  );
 
   const handleMouseUp = useCallback(() => setIsDragging(false), []);
 
-  const imageStyle = useMemo(() => ({
-    maxWidth: "100%",
-    maxHeight: "100%",
-    objectFit: "contain",
-    filter: `brightness(${windowWidth / 1000}) contrast(${(windowLevel + 1000) / 1000})`,
-    transform: `scale(${zoom}) rotate(${rotation}deg)`,
-    pointerEvents: "none",
-  }), [windowWidth, windowLevel, zoom, rotation]);
+  const imageStyle = useMemo(
+    () => ({
+      maxWidth: "100%",
+      maxHeight: "100%",
+      objectFit: "contain",
+      filter: `brightness(${windowWidth / 1000}) contrast(${(windowLevel + 1000) / 1000})`,
+      transform: `scale(${zoom}) rotate(${rotation}deg)`,
+      pointerEvents: "none",
+    }),
+    [windowWidth, windowLevel, zoom, rotation]
+  );
 
-  const viewerStyle = useMemo(() => ({
-    width: "min(90vw, 1200px)",
-    height: "min(60vh, 600px)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: isDragging ? "grabbing" : "grab",
-  }), [isDragging]);
+  const viewerStyle = useMemo(
+    () => ({
+      width: "min(90vw, 1200px)",
+      height: "min(60vh, 600px)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      cursor: isDragging ? "grabbing" : "grab",
+    }),
+    [isDragging]
+  );
 
-  const ProgressBar = useCallback(({ progress, label }) => (
-    <div className="w-full max-w-md mb-4 sm:mb-6 px-2">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs sm:text-sm font-medium text-gray-300">{label}</span>
-        <span className="text-xs sm:text-sm font-semibold text-purple-400">
-          {Math.round(progress)}%
-        </span>
-      </div>
-      <div className="w-full bg-gray-700 rounded-full h-2.5 sm:h-3 overflow-hidden">
-        <div
-          className="bg-gradient-to-r from-[#007AFF] via-[#C633FF] to-[#FF4D00] h-2.5 sm:h-3 rounded-full transition-all duration-300 ease-out relative"
-          style={{ width: `${progress}%` }}
-        >
-          <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+  const ProgressBar = useCallback(
+    ({ progress, label }) => (
+      <div className="w-full max-w-md mb-4 sm:mb-6 px-2">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs sm:text-sm font-medium text-gray-300">{label}</span>
+          <span className="text-xs sm:text-sm font-semibold text-purple-400">
+            {Math.round(progress)}%
+          </span>
+        </div>
+        <div className="w-full bg-gray-700 rounded-full h-2.5 sm:h-3 overflow-hidden">
+          <div
+            className="bg-gradient-to-r from-[#007AFF] via-[#C633FF] to-[#FF4D00] h-2.5 sm:h-3 rounded-full transition-all duration-300 ease-out relative"
+            style={{ width: `${progress}%` }}
+          >
+            <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+          </div>
         </div>
       </div>
-    </div>
-  ), []);
+    ),
+    []
+  );
 
   if (!session_id || !images.length) {
     return (
@@ -385,10 +401,11 @@ export default function Viewer() {
         <button
           onClick={segmentarImagen}
           disabled={loadingSegment}
-          className={`w-full sm:flex-1 px-4 sm:px-6 py-2.5 sm:py-3 text-white font-semibold rounded-lg shadow-lg transition-all text-sm sm:text-base ${loadingSegment
-            ? 'bg-gray-600 cursor-not-allowed'
-            : 'bg-gradient-to-r from-[#007AFF] via-[#C633FF] to-[#FF4D00] hover:opacity-90'
-            }`}
+          className={`w-full sm:flex-1 px-4 sm:px-6 py-2.5 sm:py-3 text-white font-semibold rounded-lg shadow-lg transition-all text-sm sm:text-base ${
+            loadingSegment
+              ? "bg-gray-600 cursor-not-allowed"
+              : "bg-gradient-to-r from-[#007AFF] via-[#C633FF] to-[#FF4D00] hover:opacity-90"
+          }`}
         >
           {loadingSegment ? "Segmentando..." : "Segmentar esta imagen"}
         </button>
@@ -396,10 +413,11 @@ export default function Viewer() {
         <button
           onClick={segmentarSerie3D}
           disabled={loading3D}
-          className={`w-full sm:flex-1 px-4 sm:px-6 py-2.5 sm:py-3 text-white font-semibold rounded-lg shadow-lg transition-all text-sm sm:text-base ${loading3D
-            ? 'bg-gray-600 cursor-not-allowed'
-            : 'bg-gradient-to-r from-[#007AFF] via-[#C633FF] to-[#FF4D00] hover:opacity-90'
-            }`}
+          className={`w-full sm:flex-1 px-4 sm:px-6 py-2.5 sm:py-3 text-white font-semibold rounded-lg shadow-lg transition-all text-sm sm:text-base ${
+            loading3D
+              ? "bg-gray-600 cursor-not-allowed"
+              : "bg-gradient-to-r from-[#007AFF] via-[#C633FF] to-[#FF4D00] hover:opacity-90"
+          }`}
         >
           {loading3D ? "Procesando 3D..." : "Segmentar serie (3D)"}
         </button>

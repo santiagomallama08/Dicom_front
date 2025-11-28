@@ -17,7 +17,6 @@ const RegisterForm = () => {
   const [success, setSuccess] = useState('');
   const [passwordFocus, setPasswordFocus] = useState(false);
 
-  // Validaciones de contraseña
   const passwordValidations = {
     minLength: form.password.length >= 8,
     hasUpperCase: /[A-Z]/.test(form.password),
@@ -35,8 +34,8 @@ const RegisterForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
-    // Validar contraseña antes de enviar
     if (!isPasswordValid) {
       setError('La contraseña no cumple con los requisitos de seguridad');
       return;
@@ -47,7 +46,7 @@ const RegisterForm = () => {
       setSuccess(response.message);
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      setError(err);
+      setError(err?.response?.data?.detail || err?.message || "Error al registrar usuario");
     }
   };
 
@@ -107,8 +106,7 @@ const RegisterForm = () => {
               className="w-full px-4 py-3 rounded-lg bg-[#2c2c2e] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
               placeholder="Contraseña"
             />
-            
-            {/* Indicadores de validación de contraseña */}
+
             {(passwordFocus || form.password.length > 0) && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}

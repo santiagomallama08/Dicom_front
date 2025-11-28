@@ -4,13 +4,16 @@ export default function SegmentResult({ isOpen, onClose, segmentacion }) {
 
   const { mask_path, dimensiones } = segmentacion;
 
-  // ✅ Verificación robusta: evita error si dimensiones es null o undefined
   const tieneDimensiones =
     dimensiones && typeof dimensiones === "object" && Object.keys(dimensiones).length > 0;
+
+  // ✅ URL base del backend
+  const API_URL = import.meta.env.VITE_API_URL;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
       <div className="bg-[#1D1D1F] text-white p-6 rounded-lg shadow-xl w-[90vw] max-w-6xl flex gap-6 relative">
+
         {/* Botón cerrar */}
         <button
           onClick={onClose}
@@ -22,9 +25,10 @@ export default function SegmentResult({ isOpen, onClose, segmentacion }) {
         {/* Imagen segmentada */}
         <div className="flex-1 flex flex-col items-center">
           <h2 className="text-lg font-bold mb-3">Imagen Segmentada</h2>
+
           {mask_path ? (
             <img
-              src={`http://localhost:8000${mask_path}`}
+              src={`${API_URL}${mask_path}`}   //  <-- SOLO ESTO SE CAMBIÓ
               alt="Segmentación"
               className="rounded-lg border border-gray-700 max-h-[70vh] object-contain"
             />

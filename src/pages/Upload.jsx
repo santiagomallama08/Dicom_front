@@ -5,6 +5,9 @@ import UploadCard from '../components/dicom/UploadCard';
 import Swal from 'sweetalert2';
 import { userHeaders } from '../utils/authHeaders';
 
+// 🔥 NO CAMBIÉ NADA MÁS, SOLO LA URL
+const API = import.meta.env.VITE_API_URL;
+
 export default function UploadPage() {
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -30,10 +33,10 @@ export default function UploadPage() {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:8000/upload-dicom-series/', {
+      const response = await fetch(`${API}/upload-dicom-series/`, {
         method: 'POST',
         headers: {
-          ...userHeaders(), 
+          ...userHeaders(),
         },
         body: formData,
       });

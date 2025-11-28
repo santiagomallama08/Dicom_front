@@ -5,7 +5,8 @@ import { FileText, Download, Loader2, Eye, Trash2, Calendar, Layers, FileCheck }
 import Swal from 'sweetalert2';
 import { userHeaders } from '../utils/authHeaders';
 
-const API = 'http://localhost:8000';
+// 🔥 Cambiado: ahora toma la URL desde .env
+const API = import.meta.env.VITE_API_URL;
 
 export default function Reportes() {
   const navigate = useNavigate();
@@ -154,10 +155,9 @@ export default function Reportes() {
     }
   };
 
-  // ✅ AGREGAR ESTA FUNCIÓN NUEVA
+  // 🔥 ARREGLADO: ahora usa ruta absoluta con API
   const verSerie = async (serie) => {
     try {
-      // Cargar mapping.json
       const mappingRes = await fetch(
         `${API}/static/series/${serie.session_id}/mapping.json`
       );
@@ -172,11 +172,11 @@ export default function Reportes() {
       }
 
       const mapping = await mappingRes.json();
+
       const imagePaths = Object.keys(mapping).map(
-        (nombre) => `/static/series/${serie.session_id}/${nombre}`
+        (nombre) => `${API}/static/series/${serie.session_id}/${nombre}`
       );
 
-      // Navegar al visor con las imágenes
       navigate(`/visor/${serie.session_id}`, {
         state: { images: imagePaths, source: 'reportes' }
       });
@@ -203,7 +203,7 @@ export default function Reportes() {
   return (
     <section className="min-h-screen bg-gray-50 text-gray-900 p-4 sm:p-6 lg:p-10">
       <div className="max-w-7xl mx-auto">
-        {/* Header con estadísticas */}
+
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
             Reportes Médicos
@@ -257,7 +257,6 @@ export default function Reportes() {
             </div>
           )}
 
-          {/* Filtros */}
           {!cargando && series.length > 0 && (
             <div className="flex gap-2 flex-wrap">
               <button
@@ -269,6 +268,7 @@ export default function Reportes() {
               >
                 Todas ({series.length})
               </button>
+
               <button
                 onClick={() => setFiltro('con-seg')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filtro === 'con-seg'
@@ -278,6 +278,7 @@ export default function Reportes() {
               >
                 Con segmentaciones ({series.filter(s => s.tieneSegmentaciones).length})
               </button>
+
               <button
                 onClick={() => setFiltro('sin-seg')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filtro === 'sin-seg'
@@ -316,14 +317,6 @@ export default function Reportes() {
           </div>
         )}
 
-        {!cargando && seriesFiltradas.length === 0 && series.length > 0 && (
-          <div className="bg-white border border-gray-200 rounded-xl p-8 text-center shadow-md">
-            <div className="text-4xl mb-3">🔍</div>
-            <p className="text-gray-600">No hay series con este filtro</p>
-          </div>
-        )}
-
-        {/* Grid de series */}
         {!cargando && seriesFiltradas.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {seriesFiltradas.map((serie) => (
@@ -331,7 +324,6 @@ export default function Reportes() {
                 key={serie.session_id}
                 className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-all"
               >
-                {/* Header compacto */}
                 <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4">
                   <h3 className="font-semibold text-base sm:text-lg mb-1 truncate">
                     {serie.nombrearchivo}
@@ -342,9 +334,7 @@ export default function Reportes() {
                   </div>
                 </div>
 
-                {/* Body */}
                 <div className="p-4">
-                  {/* Badges de segmentaciones */}
                   <div className="flex gap-2 mb-4 flex-wrap">
                     {serie.segmentaciones2D > 0 ? (
                       <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-50 border border-green-300 text-green-700 text-xs font-medium">
@@ -367,7 +357,6 @@ export default function Reportes() {
                     )}
                   </div>
 
-                  {/* Barra de progreso */}
                   {generando === serie.session_id && (
                     <div className="mb-4 bg-purple-50 border border-purple-200 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-2">
@@ -387,7 +376,6 @@ export default function Reportes() {
                     </div>
                   )}
 
-                  {/* Acciones */}
                   {serie.tieneSegmentaciones ? (
                     <button
                       onClick={() => generarReporte(serie)}
@@ -423,7 +411,6 @@ export default function Reportes() {
                     </div>
                   )}
 
-                  {/* Botones secundarios */}
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => navigate(`/segmentaciones/${serie.session_id}`)}
@@ -434,41 +421,20 @@ export default function Reportes() {
                     </button>
 
                     <button
-                      o onClick={() => verSerie(serie)}
+                      onClick={() => verSerie(serie)}
                       className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-medium transition-colors"
                     >
                       <Eye size={14} />
                       Ver Serie
                     </button>
                   </div>
+
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* Info footer */}
-        {!cargando && series.length > 0 && (
-          <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <FileText className="text-blue-600" size={24} />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">
-                  📋 Contenido del reporte médico
-                </h3>
-                <ul className="text-sm text-gray-700 space-y-1">
-                  <li>✓ Datos completos del paciente (si está vinculado)</li>
-                  <li>✓ Información técnica del estudio DICOM</li>
-                  <li>✓ Mediciones detalladas de segmentaciones 2D y 3D</li>
-                  <li>✓ Listado de modelos STL generados</li>
-                  <li>✓ Formato profesional listo para impresión</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );
