@@ -187,9 +187,9 @@ export default function Pacientes() {
       });
     }
   };
+
   const verEstudioEnVisor = async (estudio) => {
     try {
-      // En vez de ir al VISOR, lo enviamos al módulo de SEGMENTACIONES
       navigate(`/segmentaciones/${estudio.session_id}`);
       setModalEstudios(false);
     } catch (error) {
@@ -200,7 +200,6 @@ export default function Pacientes() {
       });
     }
   };
-
 
   const desvincularEstudio = async (estudioId) => {
     const result = await Swal.fire({
@@ -301,7 +300,7 @@ export default function Pacientes() {
           </div>
         ) : pacientesFiltrados.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded-xl shadow-md p-8 text-center">
-            <div className="text-6xl mb-4">👥</div>
+            <div className="text-6xl mb-4"></div>
             <p className="text-lg text-gray-800 mb-2">
               {filtro ? 'No se encontraron pacientes' : 'No hay pacientes registrados'}
             </p>
@@ -479,7 +478,29 @@ export default function Pacientes() {
                       type="date"
                       className="w-full px-4 py-2 border rounded-lg"
                       value={formData.fecha_nacimiento}
-                      onChange={(e) => setFormData({ ...formData, fecha_nacimiento: e.target.value })}
+                      onChange={(e) => {
+                        const fecha = e.target.value;
+                        let edadCalculada = "";
+
+                        if (fecha) {
+                          const hoy = new Date();
+                          const nacimiento = new Date(fecha);
+                          let edad = hoy.getFullYear() - nacimiento.getFullYear();
+                          const mes = hoy.getMonth() - nacimiento.getMonth();
+
+                          if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+                            edad--;
+                          }
+
+                          edadCalculada = edad;
+                        }
+
+                        setFormData({
+                          ...formData,
+                          fecha_nacimiento: fecha,
+                          edad: edadCalculada
+                        });
+                      }}
                     />
                   </div>
 
@@ -487,9 +508,9 @@ export default function Pacientes() {
                     <label className="block text-sm mb-2">Edad</label>
                     <input
                       type="number"
-                      className="w-full px-4 py-2 border rounded-lg"
+                      className="w-full px-4 py-2 border rounded-lg bg-gray-100"
                       value={formData.edad}
-                      onChange={(e) => setFormData({ ...formData, edad: e.target.value })}
+                      readOnly
                     />
                   </div>
                 </div>

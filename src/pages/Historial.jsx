@@ -305,14 +305,7 @@ export default function Historial() {
                       <td className="px-6 py-4">
                         <div className="flex gap-2">
 
-                          <button
-                            className="bg-gradient-to-r from-[#007AFF] via-[#C633FF] to-[#FF4D00] text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-                            onClick={() => verSerie(archivo)}
-                            disabled={!archivo.session_id}
-                            title="Ver serie"
-                          >
-                            Ver
-                          </button>
+                        
 
                           <button
                             className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
@@ -377,13 +370,6 @@ export default function Historial() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-
-                    <button
-                      className="flex-1 min-w-[70px] bg-gradient-to-r from-[#007AFF] via-[#C633FF] to-[#FF4D00] text-white px-3 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 shadow-md"
-                      onClick={() => verSerie(archivo)}
-                    >
-                      Ver
-                    </button>
 
                     <button
                       className="flex-1 min-w-[70px] bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
