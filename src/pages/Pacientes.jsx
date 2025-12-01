@@ -187,40 +187,20 @@ export default function Pacientes() {
       });
     }
   };
-
   const verEstudioEnVisor = async (estudio) => {
     try {
-      const mappingRes = await fetch(
-        `${API}/static/series/${estudio.session_id}/mapping.json`
-      );
-
-      if (!mappingRes.ok) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo cargar el mapping de la serie'
-        });
-        return;
-      }
-
-      const mapping = await mappingRes.json();
-      const imagePaths = Object.keys(mapping).map(
-        (nombre) => `${API}/static/series/${estudio.session_id}/${nombre}`
-      );
-
+      // En vez de ir al VISOR, lo enviamos al módulo de SEGMENTACIONES
+      navigate(`/segmentaciones/${estudio.session_id}`);
       setModalEstudios(false);
-
-      navigate(`/visor/${estudio.session_id}`, {
-        state: { images: imagePaths, source: 'pacientes' }
-      });
     } catch (error) {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'No se pudo cargar la serie del estudio'
+        text: 'No se pudo abrir el estudio para segmentaciones.'
       });
     }
   };
+
 
   const desvincularEstudio = async (estudioId) => {
     const result = await Swal.fire({
@@ -276,7 +256,7 @@ export default function Pacientes() {
   return (
     <section className="min-h-screen bg-gray-50 text-gray-900 p-4 sm:p-6 lg:p-10">
       <div className="max-w-7xl mx-auto">
-        
+
         {/* ------- HEADER ------- */}
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">

@@ -289,7 +289,7 @@ export default function ExportacionSTL() {
                   {serie.tieneSegmentaciones3D ? (
                     <>
                       <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
-                        🧊 Segmentaciones 3D disponibles para exportar
+                        Segmentaciones 3D disponibles para exportar
                       </h4>
                       <div className="space-y-3 mb-6">
                         {serie.segmentaciones3D.map((seg) => (

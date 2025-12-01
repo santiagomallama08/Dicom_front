@@ -532,7 +532,7 @@ export default function Modelado3D() {
       {/* BOTONES */}
       <div className="flex flex-wrap items-center gap-3 mb-3">
         <label className="bg-purple-600 hover:bg-purple-700 transition px-4 py-2 rounded cursor-pointer text-sm text-white">
-          📁 Subir modelo STL
+          Subir modelo STL
           <input type="file" accept=".stl" className="hidden" onChange={handleFileUpload} />
         </label>
 
@@ -541,7 +541,7 @@ export default function Modelado3D() {
           disabled={!currentMesh}
           className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 disabled:opacity-50 transition px-4 py-2 rounded text-sm text-white"
         >
-          🗑️ Eliminar Modelo
+          Eliminar Modelo
         </button>
 
         <button
@@ -558,7 +558,7 @@ export default function Modelado3D() {
           disabled={selectedPoints.length === 0}
           className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-700 disabled:opacity-50 transition px-4 py-2 rounded text-sm text-white"
         >
-          🧹 Limpiar ({selectedPoints.length})
+          Limpiar ({selectedPoints.length})
         </button>
 
         <button
@@ -566,13 +566,13 @@ export default function Modelado3D() {
           disabled={selectedPoints.length < 3}
           className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:opacity-50 transition px-4 py-2 rounded text-sm text-white font-medium"
         >
-          💾 Exportar Prótesis ({selectedPoints.length})
+          Exportar Prótesis ({selectedPoints.length})
         </button>
       </div>
 
       {/* Instrucciones */}
       <div className="text-xs text-gray-400 mb-3">
-        🖱 <strong>Controles:</strong> Rotar: clic izquierdo + arrastrar · Zoom: scroll o rueda · Pan: clic derecho + arrastrar
+        <strong>Controles:</strong> Rotar: clic izquierdo + arrastrar · Zoom: scroll o rueda · Pan: clic derecho + arrastrar
         {selectionMode && (
           <span className="text-green-400 ml-2">
             · <strong>Modo Activo:</strong> Clic simple para marcar puntos | Puedes rotar libremente
@@ -608,7 +608,6 @@ export default function Modelado3D() {
         </div>
       )}
 
-      {/* VISOR 3D */}
       <div
         ref={mountRef}
         className="flex-1 min-h-[400px] bg-[#0a0a0a] border border-[#1f1f1f] rounded-md shadow-lg"
